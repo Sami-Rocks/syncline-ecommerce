@@ -1,73 +1,111 @@
 <template>
-<div class="App" >
-  <div class="header">
-    <div class="logo">
-      SamiLogo
+    <div class="App" >
+        <div class="header">
+            <div class="logo">
+                SamiLogo
+            </div>
+            <div class="cart">
+                <img src="./assets/add_to_cart.svg" alt='cart'/>
+            </div>
+        </div>
+        <div class="main-content" >
+            <div class="shop">
+                <h2>Shop</h2>
+                <div class="product-list" > 
+                    <Products 
+                        @created="handleCreated"
+                        v-for="product in products"  
+                        v-on:click="addToCart(product)"
+                        v-bind:key="product.id"
+                        v-bind:image="product.better_featured_image.source_url"
+                        v-bind:title="product.title.rendered"
+                        v-bind:price="product._regular_price"
+                        v-bind:sale="product._sale_price"
+                    ></Products>
+                </div>
+            </div>
+            <div class="cart" >
+                <h2>Cart</h2>
+                <div class="cart-lists">
+                    <Cart 
+                        v-for="cartItem in cart"
+                        v-on:click="removeProduct(cartItem)"
+                        v-bind:key="cartItem.id"
+                        v-bind:image="cartItem.better_featured_image.source_url"
+                        v-bind:title="cartItem.title.rendered"
+                        v-bind:price="cartItem._regular_price"
+                        v-bind:sale="cartItem._sale_price"
+                    ></Cart>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="cart">
-      <img src="./assets/add_to_cart.svg" alt='cart'/>
-    </div>
-  </div>
-
-  <div class="main-content" >
-    <div class="shop">
-      <h2>Shop</h2>
-      <div class="product-list" > 
-        <Products 
-          v-for="product in products"  
-          v-bind:key="product.id"
-          v-bind:image="product.image"
-          v-bind:title="product.title"
-          v-bind:price="product.price"
-        ></Products>
-        
-      </div>
-    </div>
-    <div class="cart" >
-      <h2>Cart</h2>
-    </div>
-  </div>
-</div>
 </template>
 
 <script>
-  import Products from './components/Products';
-  import data from './data.json';
+    import Products from './components/Products';
+    import Cart from './components/Cart';
+    import data from './data.json';
+    import axios from 'axios'
 
-  export default {
-    name: 'App',
-    components: {
-      Products
-    },
-    data: () => {
-      return {
-        products: data.products,
-      }
+    export default {
+        name: 'App',
+        components: {
+            Products,
+            Cart
+        },
+        created: function() {
+            axios
+            .get('http://localhost/ecommerce/?rest_route=/wp/v2/product')
+            .then(response =>{
+                (console.log(response.data[0]['better_featured_image']['source_url']))
+                this.products = response.data
+                console.log(this.products)
+            })
+        },
+        data: () => {
+            return {
+                products: data.products,
+                cart: []
+            }
+        },
+        methods: {
+            handleCreated(){
+                console.log('Childed component created')
+            },
+            addToCart(product){
+                this.cart.push(product)
+                console.log(this.cart)
+            },
+            removeProduct(item){
+                this.cart.splice(this.cart.indexOf(item),1)
+                console.log(this.cart)
+            }
+        }
     }
-  }
 </script>
 
 <style lang="scss">
-  $orange :#FF6B01;
-  $blue: #45409C;
-  $green: #01AF67;
-  $yellow: #FDC20C;
+    $orange :#FF6B01;
+    $blue: #45409C;
+    $green: #01AF67;
+    $yellow: #FDC20C;
 
-  $clear: #FFE9BE;
+    $clear: #FFE9BE;
 
-  $background_color: #FFEBC1;
+    $background_color: #FFEBC1;
 
 html {
-  font-size: 62.5%;
-  box-sizing: border-box;
+    font-size: 62.5%;
+    box-sizing: border-box;
 }
 
 
 body, #app{
-  background: $background_color;
-  height: 100vh;
-  margin: 0;
-  font-family: 'Lato', sans-serif;
+    background: $background_color;
+    height: 100vh;
+    margin: 0;
+    font-family: 'Lato', sans-serif;
 }
 
 .App{
@@ -221,7 +259,50 @@ body, #app{
             height: 28rem;
             background: $green;
             border-radius: 3rem;
-            padding: 2rem;
+            padding: 2rem 0;
+            .cart-lists{
+                width: 100%;
+                height: 10rem;
+                .cart-list{
+                    padding: 2rem;
+                    transition: .5s all ease;
+                    cursor: pointer;
+                    display: flex;
+                    flex-direction: row;
+                    justify-content: space-between;
+                    align-items: center;
+                    .cart-product-image{
+                        width: 4rem;
+                        height: 4rem;
+                        overflow: hidden;
+                        object-fit: cover;
+                        img{
+                            width: 4rem;
+                            height: 4rem;
+                            object-fit: cover;
+                        }
+                    }
+                    .cart-product-title-price{
+                        text-align: left;
+                        overflow: hidden;
+                        p{
+                            margin: 0;
+                            font-size: 1.5rem;
+                        }
+                        h4{font-size: 2rem; margin: 0;}
+                    }
+                    .rm-btn{
+                        background: black;
+                        color: $yellow;
+                        border: none;
+                        padding: .8rem 1rem;
+                        font-weight: 900;
+                    }
+                }
+                .cart-list:hover{
+                    background: $yellow;
+                }
+            }
         }
     }
 

@@ -22,7 +22,7 @@
                 <h4> {{title}} </h4>
             </div>
             <div className="product-price">
-                <p>GHC {{price}} </p>
+                <p><strike style="fontSize: 13px" >GH¢ {{price}} </strike> GH¢ {{sale}} </p>
             </div>
         </div>              
 </template>
@@ -32,8 +32,10 @@
         name: 'Products',
         props: {
             title: String,
-            price: Number,
-            image: String
+            price: String,
+            sale: String,
+            image: String,
+            addToCart: Function
         },
         data: () => {
             return{
