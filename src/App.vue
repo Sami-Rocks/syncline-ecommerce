@@ -5,7 +5,7 @@
                 SamiLogo
             </div>
             <div class="cart">
-                <img src="./assets/add_to_cart.svg" alt='cart'/>
+                <!-- <img src="./assets/add_to_cart.svg" alt='cart'/> -->
             </div>
         </div>
         <div class="main-content" >
@@ -13,23 +13,27 @@
                 <h2>Shop</h2>
                 <div class="product-list" > 
                     <Products 
-                        @created="handleCreated"
                         v-for="product in products"  
-                        v-on:click="addToCart(product)"
+                        v-on:add-event="addToCart(product)"
+                        @click="openModal(product)"
                         v-bind:key="product.id"
                         v-bind:image="product.better_featured_image.source_url"
                         v-bind:title="product.title.rendered"
                         v-bind:price="product._regular_price"
                         v-bind:sale="product._sale_price"
+                        v-bind:description="product.content.rendered"
                     ></Products>
                 </div>
             </div>
             <div class="cart" >
                 <h2>Cart</h2>
+                <div class="empty-cart" v-if="this.cart.length == 0" >
+                    <p>Cart is empty</p>
+                </div>
                 <div class="cart-lists">
                     <Cart 
                         v-for="cartItem in cart"
-                        v-on:click="removeProduct(cartItem)"
+                        v-on:remove-event="removeProduct(cartItem)"
                         v-bind:key="cartItem.id"
                         v-bind:image="cartItem.better_featured_image.source_url"
                         v-bind:title="cartItem.title.rendered"
@@ -45,8 +49,8 @@
 <script>
     import Products from './components/Products';
     import Cart from './components/Cart';
-    import data from './data.json';
-    import axios from 'axios'
+    //import data from './data.json';
+    import axios from 'axios';
 
     export default {
         name: 'App',
@@ -58,28 +62,29 @@
             axios
             .get('http://localhost/ecommerce/?rest_route=/wp/v2/product')
             .then(response =>{
-                (console.log(response.data[0]['better_featured_image']['source_url']))
                 this.products = response.data
-                console.log(this.products)
             })
         },
         data: () => {
             return {
-                products: data.products,
-                cart: []
+                products: [],
+                cart: [],
+                modalProduct: []
             }
         },
         methods: {
-            handleCreated(){
-                console.log('Childed component created')
-            },
             addToCart(product){
-                this.cart.push(product)
-                console.log(this.cart)
+                if(this.cart.indexOf(product) === -1 ){
+                    this.cart.push(product)
+                }else{
+                    alert('item is already in cart!')
+                }
             },
             removeProduct(item){
                 this.cart.splice(this.cart.indexOf(item),1)
-                console.log(this.cart)
+            },
+            openModal(product){
+                this.modalProduct = product
             }
         }
     }
@@ -90,9 +95,7 @@
     $blue: #45409C;
     $green: #01AF67;
     $yellow: #FDC20C;
-
     $clear: #FFE9BE;
-
     $background_color: #FFEBC1;
 
 html {
@@ -155,6 +158,7 @@ body, #app{
             flex-wrap: wrap;
             gap: 2rem;
             width: fit-content !important;
+            min-width: 100%;
             .product{
                 flex: 1 1 29rem;
                 width: 25rem;
@@ -175,7 +179,7 @@ body, #app{
                     justify-content: space-between;
                     padding: .2rem;
                     transition: .5s all ease;
-                    img{
+                    img,svg{
                         width: 1.52rem;
                         height: 1.52rem;
                         border: .1rem solid #ccc;
@@ -260,13 +264,16 @@ body, #app{
             background: $green;
             border-radius: 3rem;
             padding: 2rem 0;
+            .empty-cart{
+                font-size: 1.5rem;
+                color: $yellow;
+            }
             .cart-lists{
                 width: 100%;
                 height: 10rem;
                 .cart-list{
                     padding: 2rem;
                     transition: .5s all ease;
-                    cursor: pointer;
                     display: flex;
                     flex-direction: row;
                     justify-content: space-between;
@@ -279,17 +286,25 @@ body, #app{
                         img{
                             width: 4rem;
                             height: 4rem;
-                            object-fit: cover;
+                            object-fit: fill;
                         }
                     }
                     .cart-product-title-price{
                         text-align: left;
                         overflow: hidden;
+                        max-width: 14rem;
+                        max-height: 5rem;
                         p{
                             margin: 0;
                             font-size: 1.5rem;
                         }
-                        h4{font-size: 2rem; margin: 0;}
+                        h4{
+                            text-overflow: ellipsis;
+                            font-size: 2rem; 
+                            margin: 0; 
+                            overflow: hidden;
+                            white-space: nowrap;
+                        }
                     }
                     .rm-btn{
                         background: black;
@@ -297,6 +312,7 @@ body, #app{
                         border: none;
                         padding: .8rem 1rem;
                         font-weight: 900;
+                        cursor: pointer;
                     }
                 }
                 .cart-list:hover{
@@ -307,64 +323,7 @@ body, #app{
     }
 
 }
-        .product-modal{
-            display: flex;
-            text-align: center;
-            flex-direction: column;
-            justify-content: center;
-            padding: 1rem;
-            .product-modal-title{
-                font-size: 3rem;
-                color: $blue;
-            }
-            .product-modal-description{
-                font-size: 1.5rem;
-                color: $blue;
-                padding: 2rem;
-                padding-top: .41rem;
-            }
-            .product-modal-image{
-                margin: auto;
-                overflow: hidden;
-                height: 25rem;
-                width: 25rem;
-                border-top: .21rem solid $orange;
-                border-bottom: .21rem solid $orange;
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                -webkit-box-shadow: 0px 3px 28px 0px rgba($orange, 0.37);
-                -moz-box-shadow:    0px 3px 28px 0px rgba($orange, 0.37);
-                box-shadow:         0px 3px 28px 0px rgba($orange, 0.37);
-                    .product-modal-circle{
-                        height: 22rem;
-                        width: 22rem;
-                        overflow: hidden;
-                        border-radius: 50%;
-                        margin: auto;
-                        background-color: #FFEFCB;
-                        -webkit-box-shadow: 0px -3px 22px 0px rgba(218, 223, 223, 0.56);
-                        -moz-box-shadow:    0px -3px 22px 0px rgba(218, 223, 223, 0.56);
-                        box-shadow:         0px -3px 22px 0px rgba(218, 223, 223, 0.56);
-                        img{
-                            margin-top: 15%;
-                            width: 18rem;
-                            height: auto;
-                            object-fit: cover;
-                        }
-                    }
-            }
-            .product-modal-button{
-                padding: 1.2rem;
-                border: none;
-                font-weight: 700;
-                margin: 2.5rem;
-                font-size: 1.6rem;
-                border-radius: 2rem;
-                background: black;
-                color: $yellow;
-            }
-        }
+        
 .close{
     display: flex;
     justify-content: center;

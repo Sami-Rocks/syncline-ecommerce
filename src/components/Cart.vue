@@ -8,7 +8,7 @@
             <p>GH¢ {{price}}</p>
         </div>
         <div class="remove-button">
-            <button class="rm-btn" >
+            <button class="rm-btn" @click="removeProduct" >
                 X
             </button>
         </div>
@@ -23,6 +23,11 @@
             title: String,
             price: String,
             image: String,
+        },
+        methods: {
+            removeProduct(){
+                this.$emit("remove-event");
+            }
         }
     }
 </script>
