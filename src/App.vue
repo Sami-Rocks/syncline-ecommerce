@@ -17,10 +17,10 @@
                         v-on:add-event="addToCart(product)"
                         @click="openModal(product)"
                         v-bind:key="product.id"
-                        v-bind:image="product.better_featured_image.source_url"
+                        v-bind:image="product['better_featured_image']['source_url']"
                         v-bind:title="product.title.rendered"
-                        v-bind:price="product._regular_price"
-                        v-bind:sale="product._sale_price"
+                        v-bind:price="product.price"
+                        v-bind:sale="product.sale"
                         v-bind:description="product.content.rendered"
                     ></Products>
                 </div>
@@ -35,10 +35,10 @@
                         v-for="cartItem in cart"
                         v-on:remove-event="removeProduct(cartItem)"
                         v-bind:key="cartItem.id"
-                        v-bind:image="cartItem.better_featured_image.source_url"
+                        v-bind:image="cartItem['better_featured_image']['source_url']"
                         v-bind:title="cartItem.title.rendered"
-                        v-bind:price="cartItem._regular_price"
-                        v-bind:sale="cartItem._sale_price"
+                        v-bind:price="cartItem.price"
+                        v-bind:sale="cartItem.price"
                     ></Cart>
                 </div>
             </div>
@@ -60,7 +60,7 @@
         },
         created: function() {
             axios
-            .get('http://localhost/ecommerce/?rest_route=/wp/v2/product')
+            .get('http://localhost/ecommerce/?rest_route=/wp/v2/product&_embed')
             .then(response =>{
                 this.products = response.data
             })
@@ -123,7 +123,6 @@ body, #app{
         flex-direction: row;
         justify-content: space-between;
         align-items: center;
-        
         padding: 0 1rem;
         .logo{
             font-size: 1.7rem;
@@ -158,9 +157,8 @@ body, #app{
             flex-wrap: wrap;
             gap: 2rem;
             width: fit-content !important;
-            min-width: 100%;
+            min-width: 25rem;
             .product{
-                flex: 1 1 29rem;
                 width: 25rem;
                 cursor: pointer;
                 max-width: 25rem;
